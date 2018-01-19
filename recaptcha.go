@@ -31,16 +31,19 @@ var recaptchaPrivateKey string
 // the client answered the reCaptcha input question correctly.
 // It returns a boolean value indicating whether or not the client answered correctly.
 func check(remoteip, response string) (r RecaptchaResponse) {
+	r.Success = false
 	resp, err := http.PostForm(recaptchaServerName,
 		url.Values{"secret": {recaptchaPrivateKey}, "remoteip": {remoteip}, "response": {response}})
 	if err != nil {
 		log.Printf("Post error: %s\n", err)
+		return
 	}
-	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Println("Read error: could not read body: %s", err)
+		return
 	}
+	defer resp.Body.Close()
 	err = json.Unmarshal(body, &r)
 	if err != nil {
 		log.Println("Read error: got invalid JSON: %s", err)
